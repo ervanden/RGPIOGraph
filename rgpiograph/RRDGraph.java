@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Random;
 import static org.rrd4j.ConsolFun.AVERAGE;
-import org.rrd4j.core.FetchData;
-import org.rrd4j.core.FetchRequest;
 import org.rrd4j.core.RrdDb;
 import org.rrd4j.core.RrdSafeFileBackend;
 import org.rrd4j.core.Util;
@@ -20,7 +18,7 @@ import org.rrd4j.graph.TimeLabelFormat;
 public class RRDGraph {
 
     static ArrayList<String> SENSORS = new ArrayList<>();
-    static HashMap<String, Color> COLORS = new HashMap<>();
+    static HashMap<String, String> COLORNAMES = new HashMap<>();
 
     static void println(String msg) {
         System.out.println(msg);
@@ -30,10 +28,11 @@ public class RRDGraph {
         System.out.print(msg);
     }
 
-    static String createGraph(String rrdPath, long start, long end) {
+    static String createGraph(String rrdPath, long seconds) {
 
-        // test read-only access!
- /*           
+
+        /*      example code how to fetch data from the RRD
+        
          try{
          RrdDb rrdDb = new RrdDb(rrdPath, true);
          println("File reopen in read-only mode");
@@ -72,33 +71,18 @@ public class RRDGraph {
             gDef.setHeight(IMG_HEIGHT);
 
             gDef.setFilename(imgPath);
-            gDef.setStartTime(lastUpdateTime - 3600*2);
+            gDef.setStartTime(lastUpdateTime - seconds);
             gDef.setEndTime(lastUpdateTime);
             gDef.setTitle("server room environmentals");
             gDef.setVerticalLabel("temp (centigrade), humidity (%)");
 
-            // create a map 'colors' with a color for each data source
-            // the colors are taken round-robin from the list 'allColors)
-            ArrayList<Color> allColors = new ArrayList<>();
-            HashMap<String, Color> colors = new HashMap<>();
-
-            allColors.add(Color.blue);
-            allColors.add(Color.black);
-            allColors.add(Color.cyan);
-            allColors.add(Color.red);
-
-            int colorIndex = 0;
-            for (String sensor : rrdDb.getDsNames()) {
-                colors.put(sensor, allColors.get(colorIndex));
-                colorIndex = (colorIndex + 1) % allColors.size();
-            }
-
-            // now define the data sources for the graph, each with their color
-            
-            for (String sensor : rrdDb.getDsNames()) {
-                System.out.println("addding " + sensor + " to graph");
+            // add the data sources to the graph, each with their color
+//            for (String sensor : rrdDb.getDsNames()) {
+            for (String sensor : SENSORS) {
+                System.out.println("adding " + sensor + " to graph (" + COLORNAMES.get(sensor) + ")");
                 gDef.datasource(sensor, rrdPath, sensor, AVERAGE);
-                gDef.line(sensor, colors.get(sensor), sensor);
+                Color color = colorOf(COLORNAMES.get(sensor));
+                gDef.line(sensor, color, sensor);
             }
 
             gDef.comment("\\r");
@@ -111,7 +95,6 @@ public class RRDGraph {
             // create graph finally
             try {
                 RrdGraph graph = new RrdGraph(gDef);
-                println(graph.getRrdGraphInfo().dump());
             } catch (IOException ioe) {
                 imgPath = null;
             };
@@ -142,48 +125,100 @@ public class RRDGraph {
         }
     }
 
+    public static Color colorOf(String color) {
+        try {
+            return (Color) Color.class.getDeclaredField(color).get(null);
+        } catch (Exception notAvailable) {
+            return null; // ??
+        }
+    }
+
+    static int colorIndex = 0;
+
+    public static String colorNameGenerator() {
+        // next color is taken round-robin from the list 'allColors)
+        String nextColor;
+        ArrayList<String> allColors = new ArrayList<>();
+        allColors.add("blue");
+        allColors.add("black");
+        allColors.add("yellow");
+        allColors.add("red");
+
+        nextColor = allColors.get(colorIndex);
+        colorIndex = (colorIndex + 1) % allColors.size();
+        return nextColor;
+    }
+
     public static void main(String[] args) throws IOException {
 
         String RRDDIRECTORY = "C:\\Users\\erikv\\Documents\\RRD\\";
         String RRDNAME = "datastore";
         String rrdPath = RRDDIRECTORY + RRDNAME + ".rrd";
 
-        // create graph
-        String imgPath = createGraph(rrdPath,
-                Util.getTimestamp(2018, 1, 13, 16, 0),
-                Util.getTimestamp(2018, 1, 13, 24, 0)
-        );
+        String arg_range = "1d";
 
-        // locks info
-        println("== Locks info ==");
-        println(RrdSafeFileBackend.getLockInfo());
+        for (int arg = 0; arg <= args.length - 1; arg++) {
+            String[] s = args[arg].split("=");
+            if (s[0].equals("range")) {
+                arg_range = s[1];
+            } else {
+                //               System.out.println("size="+s.length);
+                String dataSource = s[0];
+                Color color = null;
+                String colorName = "none";
+                if (s.length == 2) {
+                    colorName = s[1];
+                    color = colorOf(colorName);
+                    if (color == null) {
+                        System.out.println("unknown color " + colorName);
+                    }
+                }
+                System.out.println("data source=" + dataSource + " color=" + colorName);
 
-    }
-
-    static class GaugeSource {
-
-        double value;
-        double slope = 0;
-        int countdown = 0;
-        Random RANDOM;
-
-        GaugeSource(long seed, double value) {
-            RANDOM = new Random(seed);
-            this.value = value;
+                SENSORS.add(dataSource);
+                COLORNAMES.put(dataSource, colorName); // null if not specified on the command line
+            };
         }
 
-        long getValue() {
-            if (countdown == 0) {
-                // new slope and countdown     
-                slope = (RANDOM.nextDouble() - 0.5);
-                countdown = RANDOM.nextInt(5) + 1;
+        System.out.println("range: " + arg_range);
+
+        Integer multiplier = null;
+
+        if (arg_range.matches("[0123456789]+[dD]")) {
+            multiplier = 24 * 60 * 60;
+        } else if (arg_range.matches("[0123456789]+[hH]")) {
+            multiplier = 60 * 60;
+        } else if (arg_range.matches("[0123456789]+[mM]")) {
+            multiplier = 60;
+        } else if (arg_range.matches("[0123456789]+[sS]")) {
+            multiplier = 1;
+        } else {
+            System.out.println("RGPIOGraph range=[0123456789]+[dDhHmMsS] ");
+            System.out.println(" examples: ");
+            System.out.println("    RGPIOGraph range=2d   (2 days) ");
+            System.out.println("    RGPIOGraph range=30M  (30 minutes) ");
+            System.out.println("    RGPIOGraph range=12H  (12 hours) ");
+            System.exit(0);
+        }
+
+//        System.out.println("range:ok ");
+        String rangeNumber = arg_range.replaceFirst("[dDhHmMsS]", "");
+
+//        System.out.println(" string <" + rangeNumber + ">");
+        Long range = Long.parseLong(rangeNumber) * multiplier;
+
+        System.out.println("range = " + range + " seconds");
+
+        for (String sensor : SENSORS) {
+            String colorName = COLORNAMES.get(sensor);
+            if (colorName.equals("none")) {
+                COLORNAMES.put(sensor,colorNameGenerator());
             }
-            value = value + slope * 0.01;
-//           System.out.println(slope + "\t" + value);
-            countdown--;
-            return Math.round(value * 10);
+ //           System.out.println("adding " + sensor + " to graph (" + colorName + ")");
         }
 
-    }
+        String imgPath = createGraph(rrdPath, range);
 
+        println(imgPath);
+    }
 }
