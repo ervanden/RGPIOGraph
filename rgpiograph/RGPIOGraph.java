@@ -15,7 +15,7 @@ import org.rrd4j.graph.RrdGraph;
 import org.rrd4j.graph.RrdGraphDef;
 import org.rrd4j.graph.TimeLabelFormat;
 
-public class RRDGraph {
+public class RGPIOGraph {
 
     static ArrayList<String> SENSORS = new ArrayList<>();
     static HashMap<String, String> COLORNAMES = new HashMap<>();
