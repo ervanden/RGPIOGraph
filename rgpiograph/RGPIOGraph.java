@@ -151,9 +151,14 @@ public class RGPIOGraph {
 
     public static void main(String[] args) throws IOException {
 
-        String RRDDIRECTORY = "C:\\Users\\erikv\\Documents\\RRD\\";
-        String RRDNAME = "datastore";
-        String rrdPath = RRDDIRECTORY + RRDNAME + ".rrd";
+        String RRDDIRECTORY;
+        if (System.getProperty("file.separator").equals("/")) {
+            RRDDIRECTORY = "/home/pi/RGPIO/dataStore/";
+        } else {
+            RRDDIRECTORY = "C:\\Users\\erikv\\Documents\\RRD\\";
+        }
+
+        String rrdPath = RRDDIRECTORY + "datastore.rrd";
 
         String arg_range = "1d";
 
@@ -212,9 +217,9 @@ public class RGPIOGraph {
         for (String sensor : SENSORS) {
             String colorName = COLORNAMES.get(sensor);
             if (colorName.equals("none")) {
-                COLORNAMES.put(sensor,colorNameGenerator());
+                COLORNAMES.put(sensor, colorNameGenerator());
             }
- //           System.out.println("adding " + sensor + " to graph (" + colorName + ")");
+            //           System.out.println("adding " + sensor + " to graph (" + colorName + ")");
         }
 
         String imgPath = createGraph(rrdPath, range);
