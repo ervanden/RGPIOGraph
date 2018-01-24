@@ -28,7 +28,7 @@ public class RGPIOGraph {
         System.out.print(msg);
     }
 
-    static String createGraph(String rrdPath, long seconds) {
+    static String createGraph(String rrdPath, String imgPath, long seconds) {
 
 
         /*      example code how to fetch data from the RRD
@@ -51,8 +51,6 @@ public class RGPIOGraph {
          println(fetchData.toString());
          } catch (IOException ioe){};
          */
-        String imgPath = rrdPath.replaceAll(".rrd", ".png");
-
         try {
 
             RrdDb rrdDb = new RrdDb(rrdPath, true);
@@ -143,6 +141,12 @@ public class RGPIOGraph {
         allColors.add("black");
         allColors.add("yellow");
         allColors.add("red");
+        allColors.add("pink");
+        allColors.add("orange");
+        allColors.add("magenta");
+        allColors.add("green");
+        allColors.add("gray");
+        allColors.add("cyan");
 
         nextColor = allColors.get(colorIndex);
         colorIndex = (colorIndex + 1) % allColors.size();
@@ -151,14 +155,15 @@ public class RGPIOGraph {
 
     public static void main(String[] args) throws IOException {
 
-        String RRDDIRECTORY;
+        String rrdPath = "";
+        String imgPath = "";
         if (System.getProperty("file.separator").equals("/")) {
-            RRDDIRECTORY = "/home/pi/RGPIO/dataStore/";
+            rrdPath = "/home/pi/RGPIO/dataStore/datastore.rrd";
+            imgPath = "/home/pi/html/RGPIO/graphs/latest.png";
         } else {
-            RRDDIRECTORY = "C:\\Users\\erikv\\Documents\\RRD\\";
+            rrdPath = "C:\\Users\\erikv\\Documents\\RRD\\datastore.rrd";
+            imgPath = "C:\\Users\\erikv\\Documents\\RRD\\datastore.png";
         }
-
-        String rrdPath = RRDDIRECTORY + "datastore.rrd";
 
         String arg_range = "1d";
 
@@ -222,8 +227,7 @@ public class RGPIOGraph {
             //           System.out.println("adding " + sensor + " to graph (" + colorName + ")");
         }
 
-        String imgPath = createGraph(rrdPath, range);
+        createGraph(rrdPath, imgPath, range);
 
-        println(imgPath);
     }
 }
