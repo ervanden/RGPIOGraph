@@ -6,10 +6,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Random;
 import static org.rrd4j.ConsolFun.AVERAGE;
 import org.rrd4j.core.RrdDb;
-import org.rrd4j.core.RrdSafeFileBackend;
 import org.rrd4j.core.Util;
 import org.rrd4j.graph.RrdGraph;
 import org.rrd4j.graph.RrdGraphDef;
@@ -67,7 +65,7 @@ public class RGPIOGraph {
             gDef.setLocale(Locale.US);
             gDef.setWidth(IMG_WIDTH);
             gDef.setHeight(IMG_HEIGHT);
-
+System.out.println("img path "+imgPath);
             gDef.setFilename(imgPath);
             gDef.setStartTime(lastUpdateTime - seconds);
             gDef.setEndTime(lastUpdateTime);
@@ -154,15 +152,25 @@ public class RGPIOGraph {
     }
 
     public static void main(String[] args) throws IOException {
-
+        
+     TimeStamp now = new TimeStamp();
+        
         String rrdPath = "";
         String imgPath = "";
+        String imgFileName=now.asDashSeparatedString()+".png";
+        
+        // the image file name is expected as the first line of output 
+        // RGPIOGraph will be called by the client handler of RGPIO on request of the web client
+        // The image file name is read by RGPIO from the process output and passed on to the web client
+       
+        System.out.println(imgFileName);
+        
         if (System.getProperty("file.separator").equals("/")) {
             rrdPath = "/home/pi/RGPIO/dataStore/datastore.rrd";
-            imgPath = "/home/pi/html/RGPIO/graphs/latest.png";
+            imgPath = "/home/pi/html/RGPIO/graphs/"+imgFileName;
         } else {
             rrdPath = "C:\\Users\\erikv\\Documents\\RRD\\datastore.rrd";
-            imgPath = "C:\\Users\\erikv\\Documents\\RRD\\datastore.png";
+            imgPath = "C:\\Users\\erikv\\Documents\\RRD\\"+imgFileName;
         }
 
         String arg_range = "1d";
