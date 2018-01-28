@@ -71,6 +71,7 @@ System.out.println("img path "+imgPath);
             gDef.setEndTime(lastUpdateTime);
             gDef.setTitle("server room environmentals");
             gDef.setVerticalLabel("temp (centigrade), humidity (%)");
+            gDef.setUnitsExponent(0);
 
             // add the data sources to the graph, each with their color
 //            for (String sensor : rrdDb.getDsNames()) {
