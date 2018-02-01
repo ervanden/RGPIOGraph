@@ -168,7 +168,7 @@ System.out.println("img path "+imgPath);
         
         if (System.getProperty("file.separator").equals("/")) {
             rrdPath = "/home/pi/RGPIO/dataStore/datastore.rrd";
-            imgPath = "/home/pi/html/RGPIO/graphs/"+imgFileName;
+            imgPath = "/home/pi/html/graphs/"+imgFileName;
         } else {
             rrdPath = "C:\\Users\\erikv\\Documents\\RRD\\datastore.rrd";
             imgPath = "C:\\Users\\erikv\\Documents\\RRD\\"+imgFileName;
