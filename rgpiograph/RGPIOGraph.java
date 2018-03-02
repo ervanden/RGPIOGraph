@@ -26,7 +26,7 @@ public class RGPIOGraph {
         System.out.print(msg);
     }
 
-    static String createGraph(String rrdPath, String imgPath, long seconds) {
+    static String createGraph(String rrdPath, String imgPath, long seconds, String ylabel) {
 
 
         /*      example code how to fetch data from the RRD
@@ -65,12 +65,11 @@ public class RGPIOGraph {
             gDef.setLocale(Locale.US);
             gDef.setWidth(IMG_WIDTH);
             gDef.setHeight(IMG_HEIGHT);
-System.out.println("img path "+imgPath);
             gDef.setFilename(imgPath);
             gDef.setStartTime(lastUpdateTime - seconds);
             gDef.setEndTime(lastUpdateTime);
             gDef.setTitle("server room environmentals");
-            gDef.setVerticalLabel("temp (centigrade), humidity (%)");
+            gDef.setVerticalLabel(ylabel);
             gDef.setUnitsExponent(0);
 
             // add the data sources to the graph, each with their color
@@ -175,11 +174,14 @@ System.out.println("img path "+imgPath);
         }
 
         String arg_range = "1d";
+        String arg_ylabel = "";
 
         for (int arg = 0; arg <= args.length - 1; arg++) {
             String[] s = args[arg].split("=");
             if (s[0].equals("range")) {
                 arg_range = s[1];
+            } else if (s[0].equals("ylabel")) {
+                arg_ylabel = s[1];
             } else {
                 //               System.out.println("size="+s.length);
                 String dataSource = s[0];
@@ -236,7 +238,7 @@ System.out.println("img path "+imgPath);
             //           System.out.println("adding " + sensor + " to graph (" + colorName + ")");
         }
 
-        createGraph(rrdPath, imgPath, range);
+        createGraph(rrdPath, imgPath, range, arg_ylabel);
 
     }
 }
