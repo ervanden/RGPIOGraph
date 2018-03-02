@@ -181,7 +181,7 @@ public class RGPIOGraph {
             if (s[0].equals("range")) {
                 arg_range = s[1];
             } else if (s[0].equals("label")) {
-                arg_ylabel = s[1];
+                arg_label = s[1];
             } else if (s[0].equals("ylabel")) {
                 arg_ylabel = s[1];
             } else {
