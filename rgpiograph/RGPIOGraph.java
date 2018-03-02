@@ -26,7 +26,7 @@ public class RGPIOGraph {
         System.out.print(msg);
     }
 
-    static String createGraph(String rrdPath, String imgPath, long seconds, String ylabel) {
+    static String createGraph(String rrdPath, String imgPath, long seconds, String label, String ylabel) {
 
 
         /*      example code how to fetch data from the RRD
@@ -68,7 +68,7 @@ public class RGPIOGraph {
             gDef.setFilename(imgPath);
             gDef.setStartTime(lastUpdateTime - seconds);
             gDef.setEndTime(lastUpdateTime);
-            gDef.setTitle("server room environmentals");
+            gDef.setTitle(label);
             gDef.setVerticalLabel(ylabel);
             gDef.setUnitsExponent(0);
 
@@ -152,34 +152,36 @@ public class RGPIOGraph {
     }
 
     public static void main(String[] args) throws IOException {
-        
-     TimeStamp now = new TimeStamp();
-        
+
+        TimeStamp now = new TimeStamp();
+
         String rrdPath = "";
         String imgPath = "";
-        String imgFileName=now.asDashSeparatedString()+".png";
-        
+        String imgFileName = now.asDashSeparatedString() + ".png";
+
         // the image file name is expected as the first line of output 
         // RGPIOGraph will be called by the client handler of RGPIO on request of the web client
         // The image file name is read by RGPIO from the process output and passed on to the web client
-       
         System.out.println(imgFileName);
-        
+
         if (System.getProperty("file.separator").equals("/")) {
             rrdPath = "/home/pi/RGPIO/dataStore/datastore.rrd";
-            imgPath = "/home/pi/html/graphs/"+imgFileName;
+            imgPath = "/home/pi/html/graphs/" + imgFileName;
         } else {
             rrdPath = "C:\\Users\\erikv\\Documents\\RRD\\datastore.rrd";
-            imgPath = "C:\\Users\\erikv\\Documents\\RRD\\"+imgFileName;
+            imgPath = "C:\\Users\\erikv\\Documents\\RRD\\" + imgFileName;
         }
 
         String arg_range = "1d";
+        String arg_label = "";
         String arg_ylabel = "";
 
         for (int arg = 0; arg <= args.length - 1; arg++) {
             String[] s = args[arg].split("=");
             if (s[0].equals("range")) {
                 arg_range = s[1];
+            } else if (s[0].equals("label")) {
+                arg_ylabel = s[1];
             } else if (s[0].equals("ylabel")) {
                 arg_ylabel = s[1];
             } else {
@@ -238,7 +240,7 @@ public class RGPIOGraph {
             //           System.out.println("adding " + sensor + " to graph (" + colorName + ")");
         }
 
-        createGraph(rrdPath, imgPath, range, arg_ylabel);
+        createGraph(rrdPath, imgPath, range, arg_label, arg_ylabel);
 
     }
 }
