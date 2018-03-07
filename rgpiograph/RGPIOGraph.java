@@ -71,6 +71,7 @@ public class RGPIOGraph {
             gDef.setTitle(label);
             gDef.setVerticalLabel(ylabel);
             gDef.setUnitsExponent(0);
+            gDef.setMinValue(0);
 
             // add the data sources to the graph, each with their color
 //            for (String sensor : rrdDb.getDsNames()) {
