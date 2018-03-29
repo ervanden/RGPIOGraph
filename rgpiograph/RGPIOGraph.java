@@ -26,8 +26,10 @@ public class RGPIOGraph {
         System.out.print(msg);
     }
 
-    static String createGraph(String rrdPath, String imgPath, long seconds, String label, String ylabel) {
+    static String createGraph(String rrdPath, String imgPath, long seconds, String label, String ylabel, Integer ymin, Integer ymax) {
 
+System.out.println("calling createGraph with ymin="+ymin);
+System.out.println("calling createGraph with ymax="+ymax);
 
         /*      example code how to fetch data from the RRD
         
@@ -71,8 +73,9 @@ public class RGPIOGraph {
             gDef.setTitle(label);
             gDef.setVerticalLabel(ylabel);
             gDef.setUnitsExponent(0);
-            gDef.setMinValue(0);
-
+            if (ymin!=null) gDef.setMinValue(ymin);
+            if (ymax!=null) gDef.setMaxValue(ymax);
+            
             // add the data sources to the graph, each with their color
 //            for (String sensor : rrdDb.getDsNames()) {
             for (String sensor : SENSORS) {
@@ -176,6 +179,8 @@ public class RGPIOGraph {
         String arg_range = "1d";
         String arg_label = "";
         String arg_ylabel = "";
+        String arg_ymax = "";
+        String arg_ymin = "";
 
         for (int arg = 0; arg <= args.length - 1; arg++) {
             String[] s = args[arg].split("=");
@@ -185,6 +190,10 @@ public class RGPIOGraph {
                 arg_label = s[1];
             } else if (s[0].equals("ylabel")) {
                 arg_ylabel = s[1];
+            } else if (s[0].equals("ymax")) {
+                arg_ymax = s[1];
+            } else if (s[0].equals("ymax")) {
+                arg_ymax = s[1];
             } else {
                 //               System.out.println("size="+s.length);
                 String dataSource = s[0];
@@ -220,7 +229,7 @@ public class RGPIOGraph {
             System.out.println("RGPIOGraph range=[0123456789]+[dDhHmMsS] ");
             System.out.println(" examples: ");
             System.out.println("    RGPIOGraph range=2d   (2 days) ");
-            System.out.println("    RGPIOGraph range=30M  (30 minutes) ");
+            System.out.println("    RGPIOGraph range=30M  (30 maxutes) ");
             System.out.println("    RGPIOGraph range=12H  (12 hours) ");
             System.exit(0);
         }
@@ -241,7 +250,20 @@ public class RGPIOGraph {
             //           System.out.println("adding " + sensor + " to graph (" + colorName + ")");
         }
 
-        createGraph(rrdPath, imgPath, range, arg_label, arg_ylabel);
+        Integer ymax;
+        try {
+            ymax = Integer.parseInt(arg_ymax);
+        } catch (NumberFormatException nfe) {
+            ymax = null;
+        };
+
+        Integer ymin;
+        try {
+            ymin = Integer.parseInt(arg_ymin);
+        } catch (NumberFormatException nfe) {
+            ymin = null;
+        };
+        createGraph(rrdPath, imgPath, range, arg_label, arg_ylabel, ymin, ymax);
 
     }
 }
