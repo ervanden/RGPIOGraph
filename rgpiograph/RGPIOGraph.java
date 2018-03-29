@@ -190,8 +190,8 @@ System.out.println("calling createGraph with ymax="+ymax);
                 arg_label = s[1];
             } else if (s[0].equals("ylabel")) {
                 arg_ylabel = s[1];
-            } else if (s[0].equals("ymax")) {
-                arg_ymax = s[1];
+            } else if (s[0].equals("ymin")) {
+                arg_ymin = s[1];
             } else if (s[0].equals("ymax")) {
                 arg_ymax = s[1];
             } else {
