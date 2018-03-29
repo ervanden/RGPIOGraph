@@ -191,9 +191,11 @@ System.out.println("calling createGraph with ymax="+ymax);
             } else if (s[0].equals("ylabel")) {
                 arg_ylabel = s[1];
             } else if (s[0].equals("ymin")) {
-                arg_ymin = s[1];
+                System.out.println("arg ymin s.length="+s.length);
+                if (s.length>1) arg_ymin = s[1];
             } else if (s[0].equals("ymax")) {
-                arg_ymax = s[1];
+                                System.out.println("arg ymax s.length="+s.length);
+                if (s.length>1) arg_ymax = s[1];
             } else {
                 //               System.out.println("size="+s.length);
                 String dataSource = s[0];
